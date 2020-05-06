@@ -3,8 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.hyperledger.fabric-sdk-java</groupId>
     <artifactId>fabric-sdk-java</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <version>1.4.4</version>
+    <modules>
+        <module>smchain</module>
+    </modules>
     <name>fabric-java-sdk</name>
     <description>Java SDK for Hyperledger fabric project</description>
     <url>https://www.hyperledger.org/community/projects</url>

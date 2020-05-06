@@ -1,0 +1,57 @@
+name: "Network-Config-Test"
+x-type: "hlfv1"
+description: "The network used in the integration tests"
+version: 1.0.0
+
+client:
+  organization: OrgA
+  credentialStore:
+    path: "/tmp/hfc-kvs"
+    cryptoStore:
+      path: "/tmp/hfc-cvs"
+    wallet: wallet-name
+
+channels:
+  txchannel:
+    orderers:
+      - Orderer0
+    peers:
+      peer0:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+    chaincodes:
+      - bimcc:v1.04
+
+organizations:
+  OrgA:
+    mspid: OrgA
+    peers:
+      - peer0
+
+    adminPrivateKey:
+        path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orga.example.com/users/Admin@orga.example.com/msp/keystore/9e040cfd21db9958291b4a49c0874069722b5c41df2d43700403839c611e6670_sk
+
+    signedCert:
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orga.example.com/users/Admin@orga.example.com/msp/signcerts/Admin@orga.example.com-cert.pem
+
+orderers:
+  Orderer0:
+    url: grpcs://orderer0.example.com:7050
+    tlsCACerts:
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
+    grpcOptions:
+      grpc-max-send-message-length: 15
+      grpc.keepalive_time_ms: 360000
+      grpc.keepalive_timeout_ms: 180000
+
+peers:
+  peer0:
+    url: grpcs://peer0.orga.example.com:7051
+    tlsCACerts:
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orga.example.com/tlsca/tlsca.orga.example.com-cert.pem
+    grpcOptions:
+      grpc.http2.keepalive_time: 15
+
