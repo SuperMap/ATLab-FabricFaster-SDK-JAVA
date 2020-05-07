@@ -18,16 +18,16 @@ public class SmTransactionImpTest {
 
     @Test
     public void testQuery() {
-        try {
-            String result = smChain.getTransaction().queryByString(
-                    chaincodeName,
-                    "GetRecordByKey",
-                    new String[]{"key"}
-            );
-            System.out.println("result:" + result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            String result = smChain.getTransaction().queryByString(
+//                    chaincodeName,
+//                    "GetRecordByKey",
+//                    new String[]{"key"}
+//            );
+//            System.out.println("result:" + result);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Test

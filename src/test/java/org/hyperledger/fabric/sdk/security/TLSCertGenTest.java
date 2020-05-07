@@ -16,23 +16,7 @@
 
 package org.hyperledger.fabric.sdk.security;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.net.ssl.SSLSession;
-
-import io.grpc.Grpc;
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.Server;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
+import io.grpc.*;
 import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NegotiationType;
 import io.grpc.netty.NettyChannelBuilder;
@@ -49,6 +33,15 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import javax.net.ssl.SSLSession;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TLSCertGenTest {
 
@@ -96,7 +89,8 @@ public class TLSCertGenTest {
                 .negotiationType(NegotiationType.TLS);
         ManagedChannel chan = channelBuilder.build();
         FabricProposal.SignedProposal prop = FabricProposal.SignedProposal.getDefaultInstance();
-        EndorserGrpc.newBlockingStub(chan).processProposal(prop);
+        FabricProposal.SignedProposals props = FabricProposal.SignedProposals.newBuilder().addSignedProposal(prop).build();
+        EndorserGrpc.newBlockingStub(chan).processProposal(props);
         // Ensure that TLS handshake occurred
         Assert.assertTrue("Handshake didn't occur", handshakeOccured.get());
         chan.shutdown();

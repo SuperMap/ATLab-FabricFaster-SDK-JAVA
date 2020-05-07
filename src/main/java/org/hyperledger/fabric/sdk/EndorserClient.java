@@ -14,8 +14,6 @@
 
 package org.hyperledger.fabric.sdk;
 
-import java.util.concurrent.TimeUnit;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -28,6 +26,8 @@ import org.hyperledger.fabric.protos.peer.FabricProposal;
 import org.hyperledger.fabric.protos.peer.FabricProposalResponse;
 import org.hyperledger.fabric.sdk.exception.PeerException;
 import org.hyperledger.fabric.sdk.helper.Config;
+
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
@@ -110,11 +110,11 @@ class EndorserClient {
         }
     }
 
-    public ListenableFuture<FabricProposalResponse.ProposalResponse> sendProposalAsync(FabricProposal.SignedProposal proposal) throws PeerException {
+    public ListenableFuture<FabricProposalResponse.ProposalResponses> sendProposalAsync(FabricProposal.SignedProposals proposals) throws PeerException {
         if (shutdown) {
             throw new PeerException("Shutdown " + toString());
         }
-        return futureStub.processProposal(proposal);
+        return futureStub.processProposal(proposals);
     }
 
     public ListenableFuture<Protocol.Response> sendDiscoveryRequestAsync(Protocol.SignedRequest signedRequest) throws PeerException {

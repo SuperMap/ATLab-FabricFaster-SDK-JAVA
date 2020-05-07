@@ -14,15 +14,6 @@
 
 package org.hyperledger.fabric.sdk;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.EnumSet;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.util.internal.StringUtil;
 import org.apache.commons.logging.Log;
@@ -39,10 +30,17 @@ import org.hyperledger.fabric.sdk.helper.Config;
 import org.hyperledger.fabric.sdk.security.certgen.TLSCertificateKeyPair;
 import org.hyperledger.fabric.sdk.transaction.TransactionContext;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.EnumSet;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
+
 import static java.lang.String.format;
-import static org.hyperledger.fabric.sdk.helper.Utils.checkGrpcUrl;
-import static org.hyperledger.fabric.sdk.helper.Utils.isNullOrEmpty;
-import static org.hyperledger.fabric.sdk.helper.Utils.parseGrpcUrl;
+import static org.hyperledger.fabric.sdk.helper.Utils.*;
 
 /**
  * The Peer class represents a peer to which SDK sends deploy, or query proposals requests.
@@ -224,8 +222,9 @@ public class Peer implements Serializable {
         return Objects.hash(name, url);
     }
 
-    ListenableFuture<FabricProposalResponse.ProposalResponse> sendProposalAsync(FabricProposal.SignedProposal proposal)
+    ListenableFuture<FabricProposalResponse.ProposalResponses> sendProposalAsync(FabricProposal.SignedProposals proposals)
             throws PeerException, InvalidArgumentException {
+        FabricProposal.SignedProposal proposal = proposals.getSignedProposal(0);
         checkSendProposal(proposal);
 
         if (IS_DEBUG_LEVEL) {
@@ -235,7 +234,7 @@ public class Peer implements Serializable {
         EndorserClient localEndorserClient = getEndorserClient();
 
         try {
-            return localEndorserClient.sendProposalAsync(proposal);
+            return localEndorserClient.sendProposalAsync(proposals);
         } catch (Throwable t) {
             removeEndorserClient(true);
             throw t;

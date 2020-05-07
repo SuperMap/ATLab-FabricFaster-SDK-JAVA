@@ -14,78 +14,20 @@
 
 package org.hyperledger.fabric.sdk;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
-
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.StatusRuntimeException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperledger.fabric.protos.common.Common.Block;
-import org.hyperledger.fabric.protos.common.Common.BlockMetadata;
-import org.hyperledger.fabric.protos.common.Common.ChannelHeader;
-import org.hyperledger.fabric.protos.common.Common.Envelope;
-import org.hyperledger.fabric.protos.common.Common.Header;
-import org.hyperledger.fabric.protos.common.Common.HeaderType;
-import org.hyperledger.fabric.protos.common.Common.LastConfig;
-import org.hyperledger.fabric.protos.common.Common.Metadata;
-import org.hyperledger.fabric.protos.common.Common.Payload;
-import org.hyperledger.fabric.protos.common.Common.Status;
+import org.hyperledger.fabric.protos.common.Common.*;
 import org.hyperledger.fabric.protos.common.Configtx;
-import org.hyperledger.fabric.protos.common.Configtx.ConfigEnvelope;
-import org.hyperledger.fabric.protos.common.Configtx.ConfigGroup;
-import org.hyperledger.fabric.protos.common.Configtx.ConfigSignature;
-import org.hyperledger.fabric.protos.common.Configtx.ConfigUpdateEnvelope;
-import org.hyperledger.fabric.protos.common.Configtx.ConfigValue;
+import org.hyperledger.fabric.protos.common.Configtx.*;
 import org.hyperledger.fabric.protos.common.Ledger;
 import org.hyperledger.fabric.protos.discovery.Protocol;
 import org.hyperledger.fabric.protos.msp.MspConfig;
 import org.hyperledger.fabric.protos.orderer.Ab;
-import org.hyperledger.fabric.protos.orderer.Ab.BroadcastResponse;
-import org.hyperledger.fabric.protos.orderer.Ab.DeliverResponse;
-import org.hyperledger.fabric.protos.orderer.Ab.SeekInfo;
-import org.hyperledger.fabric.protos.orderer.Ab.SeekPosition;
-import org.hyperledger.fabric.protos.orderer.Ab.SeekSpecified;
+import org.hyperledger.fabric.protos.orderer.Ab.*;
 import org.hyperledger.fabric.protos.peer.Configuration;
 import org.hyperledger.fabric.protos.peer.FabricProposal;
 import org.hyperledger.fabric.protos.peer.FabricProposal.SignedProposal;
@@ -102,31 +44,24 @@ import org.hyperledger.fabric.sdk.ServiceDiscovery.SDChaindcode;
 import org.hyperledger.fabric.sdk.ServiceDiscovery.SDEndorser;
 import org.hyperledger.fabric.sdk.ServiceDiscovery.SDEndorserState;
 import org.hyperledger.fabric.sdk.ServiceDiscovery.SDNetwork;
-import org.hyperledger.fabric.sdk.exception.CryptoException;
-import org.hyperledger.fabric.sdk.exception.EventHubException;
-import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
-import org.hyperledger.fabric.sdk.exception.ProposalException;
-import org.hyperledger.fabric.sdk.exception.ServiceDiscoveryException;
-import org.hyperledger.fabric.sdk.exception.TransactionEventException;
-import org.hyperledger.fabric.sdk.exception.TransactionException;
+import org.hyperledger.fabric.sdk.exception.*;
 import org.hyperledger.fabric.sdk.helper.Config;
 import org.hyperledger.fabric.sdk.helper.DiagnosticFileDumper;
 import org.hyperledger.fabric.sdk.helper.Utils;
 import org.hyperledger.fabric.sdk.security.certgen.TLSCertificateBuilder;
 import org.hyperledger.fabric.sdk.security.certgen.TLSCertificateKeyPair;
-import org.hyperledger.fabric.sdk.transaction.GetConfigBlockBuilder;
-import org.hyperledger.fabric.sdk.transaction.InstallProposalBuilder;
-import org.hyperledger.fabric.sdk.transaction.InstantiateProposalBuilder;
-import org.hyperledger.fabric.sdk.transaction.JoinPeerProposalBuilder;
-import org.hyperledger.fabric.sdk.transaction.ProposalBuilder;
-import org.hyperledger.fabric.sdk.transaction.ProtoUtils;
-import org.hyperledger.fabric.sdk.transaction.QueryCollectionsConfigBuilder;
-import org.hyperledger.fabric.sdk.transaction.QueryInstalledChaincodesBuilder;
-import org.hyperledger.fabric.sdk.transaction.QueryInstantiatedChaincodesBuilder;
-import org.hyperledger.fabric.sdk.transaction.QueryPeerChannelsBuilder;
-import org.hyperledger.fabric.sdk.transaction.TransactionBuilder;
-import org.hyperledger.fabric.sdk.transaction.TransactionContext;
-import org.hyperledger.fabric.sdk.transaction.UpgradeProposalBuilder;
+import org.hyperledger.fabric.sdk.transaction.*;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static org.hyperledger.fabric.sdk.Channel.PeerOptions.createPeerOptions;
@@ -884,8 +819,11 @@ public class Channel implements Serializable {
 
             addPeer(peer, peerOptions); //need to add peer.
 
+            // 将单个 FabricProposal.SignedProposal 封装进  FabricProposal.SignedProposals
+            FabricProposal.SignedProposals signedProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(signedProposal).build();
+
             Collection<ProposalResponse> resp = sendProposalToPeers(new ArrayList<>(Collections.singletonList(peer)),
-                    signedProposal, transactionContext);
+                    signedProposals, transactionContext);
 
             ProposalResponse pro = resp.iterator().next();
 
@@ -945,11 +883,14 @@ public class Channel implements Serializable {
         }
         ProposalException lastException = new ProposalException(format("getConfigBlock for channel %s failed.", name));
 
+        // 构造FabricProposal.SignedProposals 
+        FabricProposal.SignedProposals signedProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(signedProposal).build();
+
         for (Peer peer : peers) {
             try {
 
                 Collection<ProposalResponse> resp = sendProposalToPeers(new ArrayList<>(Collections.singletonList(peer)),
-                        signedProposal, transactionContext);
+                        signedProposals, transactionContext);
 
                 if (!resp.isEmpty()) {
 
@@ -2839,7 +2780,9 @@ public class Channel implements Serializable {
             FabricProposal.Proposal instantiateProposal = instantiateProposalbuilder.build();
             SignedProposal signedProposal = getSignedProposal(transactionContext, instantiateProposal);
 
-            return sendProposalToPeers(peers, signedProposal, transactionContext);
+            FabricProposal.SignedProposals signedProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(signedProposal).build();
+
+            return sendProposalToPeers(peers, signedProposals, transactionContext);
         } catch (Exception e) {
             throw new ProposalException(e);
         }
@@ -2908,7 +2851,8 @@ public class Channel implements Serializable {
             FabricProposal.Proposal deploymentProposal = installProposalbuilder.build();
             SignedProposal signedProposal = getSignedProposal(transactionContext, deploymentProposal);
 
-            return sendProposalToPeers(peers, signedProposal, transactionContext);
+            FabricProposal.SignedProposals signedProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(signedProposal).build();
+            return sendProposalToPeers(peers, signedProposals, transactionContext);
         } catch (Exception e) {
             throw new ProposalException(e);
         }
@@ -2965,7 +2909,9 @@ public class Channel implements Serializable {
 
             SignedProposal signedProposal = getSignedProposal(transactionContext, upgradeProposalBuilder.build());
 
-            return sendProposalToPeers(peers, signedProposal, transactionContext);
+            FabricProposal.SignedProposals signedProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(signedProposal).build();
+
+            return sendProposalToPeers(peers, signedProposals, transactionContext);
         } catch (Exception e) {
             throw new ProposalException(e);
         }
@@ -3627,9 +3573,11 @@ public class Channel implements Serializable {
             TransactionContext context = getTransactionContext();
 
             FabricProposal.Proposal q = QueryPeerChannelsBuilder.newBuilder().context(context).build();
-
             SignedProposal qProposal = getSignedProposal(context, q);
-            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposal, context);
+
+            FabricProposal.SignedProposals qProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(qProposal).build();
+
+            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposals, context);
 
             if (null == proposalResponses) {
                 throw new ProposalException(format("Peer %s channel query return with null for responses", peer.getName()));
@@ -3698,7 +3646,9 @@ public class Channel implements Serializable {
             FabricProposal.Proposal q = QueryInstalledChaincodesBuilder.newBuilder().context(context).build();
 
             SignedProposal qProposal = getSignedProposal(context, q);
-            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposal, context);
+
+            FabricProposal.SignedProposals qProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(qProposal).build();
+            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposals, context);
 
             if (null == proposalResponses) {
                 throw new ProposalException(format("Peer %s channel query return with null for responses", peer.getName()));
@@ -3781,7 +3731,9 @@ public class Channel implements Serializable {
             FabricProposal.Proposal q = QueryInstantiatedChaincodesBuilder.newBuilder().context(context).build();
 
             SignedProposal qProposal = getSignedProposal(context, q);
-            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposal, context);
+
+            FabricProposal.SignedProposals qProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(qProposal).build();
+            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposals, context);
 
             if (null == proposalResponses) {
                 throw new ProposalException(format("Peer %s channel query return with null for responses", peer.getName()));
@@ -3855,7 +3807,9 @@ public class Channel implements Serializable {
             FabricProposal.Proposal q = queryCollectionsConfigBuilder.build();
 
             SignedProposal qProposal = getSignedProposal(context, q);
-            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposal, context);
+
+            FabricProposal.SignedProposals qProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(qProposal).build();
+            Collection<ProposalResponse> proposalResponses = sendProposalToPeers(Collections.singletonList(peer), qProposals, context);
 
             if (null == proposalResponses) {
                 throw new ProposalException(format("Peer %s channel query return with null for responses", peer.getName()));
@@ -3965,8 +3919,10 @@ public class Channel implements Serializable {
         proposalBuilder.request(transactionProposalRequest);
 
         SignedProposal invokeProposal = null;
+        FabricProposal.SignedProposals invokeProposals = null;
         try {
             invokeProposal = getSignedProposal(transactionContext, proposalBuilder.build());
+            invokeProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(invokeProposal).build();
         } catch (CryptoException e) {
             throw new InvalidArgumentException(e);
         }
@@ -4150,7 +4106,7 @@ public class Channel implements Serializable {
                     peer2sdEndorser.put(new PeerExactMatch(epeer), sdEndorser); // reverse
                 }
 
-                final Collection<ProposalResponse> proposalResponses = sendProposalToPeers(endorsers.values(), invokeProposal, transactionContext);
+                final Collection<ProposalResponse> proposalResponses = sendProposalToPeers(endorsers.values(), invokeProposals, transactionContext);
                 HashSet<SDEndorser> loopGood = new HashSet<>();
                 HashSet<SDEndorser> loopBad = new HashSet<>();
 
@@ -4358,7 +4314,9 @@ public class Channel implements Serializable {
             proposalBuilder.request(proposalRequest);
 
             SignedProposal invokeProposal = getSignedProposal(transactionContext, proposalBuilder.build());
-            return sendProposalToPeers(peers, invokeProposal, transactionContext);
+
+            FabricProposal.SignedProposals invokeProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(invokeProposal).build();
+            return sendProposalToPeers(peers, invokeProposals, transactionContext);
         } catch (ProposalException e) {
             throw e;
 
@@ -4379,7 +4337,7 @@ public class Channel implements Serializable {
     }
 
     private Collection<ProposalResponse> sendProposalToPeers(Collection<Peer> peers,
-                                                             SignedProposal signedProposal,
+                                                             FabricProposal.SignedProposals signedProposals,
                                                              TransactionContext transactionContext) throws InvalidArgumentException, ProposalException {
         checkPeers(peers);
 
@@ -4396,9 +4354,9 @@ public class Channel implements Serializable {
         class Pair {
             private final Peer peer;
 
-            private final Future<FabricProposalResponse.ProposalResponse> future;
+            private final Future<FabricProposalResponse.ProposalResponses> future;
 
-            private Pair(Peer peer, Future<FabricProposalResponse.ProposalResponse> future) {
+            private Pair(Peer peer, Future<FabricProposalResponse.ProposalResponses> future) {
                 this.peer = peer;
                 this.future = future;
             }
@@ -4410,13 +4368,13 @@ public class Channel implements Serializable {
 
             if (null != diagnosticFileDumper) {
                 logger.trace(format("Sending to channel %s, peer: %s, proposal: %s, txID: %s", name, peer, txID,
-                        diagnosticFileDumper.createDiagnosticProtobufFile(signedProposal.toByteArray())));
+                        diagnosticFileDumper.createDiagnosticProtobufFile(signedProposals.getSignedProposal(0).toByteArray())));
 
             }
 
-            Future<FabricProposalResponse.ProposalResponse> proposalResponseListenableFuture;
+            Future<FabricProposalResponse.ProposalResponses> proposalResponseListenableFuture;
             try {
-                proposalResponseListenableFuture = peer.sendProposalAsync(signedProposal);
+                proposalResponseListenableFuture = peer.sendProposalAsync(signedProposals);
             } catch (Exception e) {
                 proposalResponseListenableFuture = new CompletableFuture<>();
                 ((CompletableFuture) proposalResponseListenableFuture).completeExceptionally(e);
@@ -4429,12 +4387,16 @@ public class Channel implements Serializable {
         Collection<ProposalResponse> proposalResponses = new ArrayList<>();
         for (Pair peerFuturePair : peerFuturePairs) {
 
+            FabricProposalResponse.ProposalResponses fabricResponses = null;
             FabricProposalResponse.ProposalResponse fabricResponse = null;
             String message;
             int status = 500;
             final String peerName = peerFuturePair.peer.toString();
             try {
-                fabricResponse = peerFuturePair.future.get(transactionContext.getProposalWaitTime(), TimeUnit.MILLISECONDS);
+                // 获取到fabric的请求响应
+                fabricResponses = peerFuturePair.future.get(transactionContext.getProposalWaitTime(), TimeUnit.MILLISECONDS);
+                fabricResponse = fabricResponses.getProposalResponse(0);
+
                 message = fabricResponse.getResponse().getMessage();
                 status = fabricResponse.getResponse().getStatus();
                 peerFuturePair.peer.setHasConnected();
@@ -4470,9 +4432,10 @@ public class Channel implements Serializable {
                 }
             }
 
+            // 将Fabric的ProposalResponse分装到sdk的ProposalResponse中
             ProposalResponse proposalResponse = new ProposalResponse(transactionContext, status, message);
             proposalResponse.setProposalResponse(fabricResponse);
-            proposalResponse.setProposal(signedProposal);
+            proposalResponse.setProposal(signedProposals.getSignedProposal(0));
             proposalResponse.setPeer(peerFuturePair.peer);
 
             if (fabricResponse != null && transactionContext.getVerify()) {

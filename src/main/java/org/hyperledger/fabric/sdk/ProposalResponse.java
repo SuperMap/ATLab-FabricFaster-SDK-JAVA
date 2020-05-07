@@ -5,10 +5,6 @@
 */
 package org.hyperledger.fabric.sdk;
 
-import java.lang.ref.WeakReference;
-
-import javax.xml.bind.DatatypeConverter;
-
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.commons.logging.Log;
@@ -27,6 +23,9 @@ import org.hyperledger.fabric.sdk.helper.Config;
 import org.hyperledger.fabric.sdk.helper.DiagnosticFileDumper;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.hyperledger.fabric.sdk.transaction.TransactionContext;
+
+import javax.xml.bind.DatatypeConverter;
+import java.lang.ref.WeakReference;
 
 import static java.lang.String.format;
 import static org.hyperledger.fabric.sdk.helper.Utils.toHexString;
@@ -50,6 +49,8 @@ public class ProposalResponse extends ChaincodeResponse {
     private ChaincodeID chaincodeID = null;
     private final TransactionContext transactionContext;
 
+
+    // 对proto中的ProposalResponse进行了封装
     ProposalResponse(TransactionContext transactionContext, int status, String message) {
         super(transactionContext.getTxID(), transactionContext.getChannelID(), status, message);
         this.transactionContext = transactionContext;
