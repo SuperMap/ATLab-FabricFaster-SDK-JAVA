@@ -4315,7 +4315,9 @@ public class Channel implements Serializable {
 
             SignedProposal invokeProposal = getSignedProposal(transactionContext, proposalBuilder.build());
 
-            FabricProposal.SignedProposals invokeProposals = FabricProposal.SignedProposals.newBuilder().addSignedProposal(invokeProposal).build();
+            FabricProposal.SignedProposals.Builder builder = FabricProposal.SignedProposals.newBuilder().addSignedProposal(invokeProposal);
+            builder.addSignedProposal(invokeProposal);
+            FabricProposal.SignedProposals invokeProposals = builder.build();
             return sendProposalToPeers(peers, invokeProposals, transactionContext);
         } catch (ProposalException e) {
             throw e;
@@ -4432,17 +4434,22 @@ public class Channel implements Serializable {
                 }
             }
 
-            // 将Fabric的ProposalResponse分装到sdk的ProposalResponse中
-            ProposalResponse proposalResponse = new ProposalResponse(transactionContext, status, message);
-            proposalResponse.setProposalResponse(fabricResponse);
-            proposalResponse.setProposal(signedProposals.getSignedProposal(0));
-            proposalResponse.setPeer(peerFuturePair.peer);
+            for (FabricProposalResponse.ProposalResponse response : fabricResponses.getProposalResponseList()) {
+                message = response.getResponse().getMessage();
+                status = response.getResponse().getStatus();
 
-            if (fabricResponse != null && transactionContext.getVerify()) {
-                proposalResponse.verify(client.getCryptoSuite());
+                // 将Fabric的ProposalResponse封装到sdk的ProposalResponse中
+                ProposalResponse proposalResponse = new ProposalResponse(transactionContext, status, message);
+                proposalResponse.setProposalResponse(fabricResponse);
+                proposalResponse.setProposal(signedProposals.getSignedProposal(0));
+                proposalResponse.setPeer(peerFuturePair.peer);
+
+                if (response != null && transactionContext.getVerify()) {
+                    proposalResponse.verify(client.getCryptoSuite());
+                }
+
+                proposalResponses.add(proposalResponse);
             }
-
-            proposalResponses.add(proposalResponse);
         }
 
         return proposalResponses;

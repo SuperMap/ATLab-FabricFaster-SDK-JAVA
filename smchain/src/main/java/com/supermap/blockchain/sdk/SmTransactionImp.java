@@ -47,6 +47,9 @@ class SmTransactionImp implements SmTransaction {
         StringBuilder stringBuilder = new StringBuilder();
         for (ProposalResponse res : proposalResponses) {
             try {
+                if (stringBuilder.length() > 0) {
+                    stringBuilder.append("-");
+                }
                 stringBuilder.append(new String(res.getChaincodeActionResponsePayload()));
             } catch (InvalidArgumentException e) {
                 e.printStackTrace();

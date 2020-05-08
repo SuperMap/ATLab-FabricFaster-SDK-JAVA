@@ -18,16 +18,19 @@ public class SmTransactionImpTest {
 
     @Test
     public void testQuery() {
-//        try {
-//            String result = smChain.getTransaction().queryByString(
-//                    chaincodeName,
-//                    "GetRecordByKey",
-//                    new String[]{"key"}
-//            );
-//            System.out.println("result:" + result);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            long startTime = System.currentTimeMillis();
+            String result = smChain.getTransaction().queryByString(
+                    chaincodeName,
+                    "GetRecordByKey",
+                    new String[]{"key3"}
+            );
+            System.out.println("result:" + result);
+            long endTime = System.currentTimeMillis();
+            System.out.println("总时间：" + (endTime - startTime) + "ms");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -37,7 +40,7 @@ public class SmTransactionImpTest {
             String result = smChain.getTransaction().invokeByString(
                     chaincodeName,
                     "PutRecord",
-                    new String[]{"key", "value"}
+                    new String[]{"key3", "value3"}
             );
             System.out.println(result);
             long endTime = System.currentTimeMillis();
@@ -53,12 +56,12 @@ public class SmTransactionImpTest {
         System.out.println(startTime);
         int loop = 2000;
         for (int i = 0; i < loop; i++) {
-            String key = "sdkKey";
+            String key = "key";
             try {
                 String result = smChain.getTransaction().invokeByString(
                         chaincodeName,
                         "PutRecord",
-                        new String[]{key, "sdkValue" + i}
+                        new String[]{key + i, "value" + i}
                 );
 //                System.out.println(i + ": " + result);
 //                Assert.assertNotEquals("", result);
@@ -77,7 +80,7 @@ public class SmTransactionImpTest {
         long startTime = System.currentTimeMillis();
         int loop = 2000;
         for (int i = 0; i < loop; i++) {
-            String key = "ttkey" + i;
+            String key = "key" + i;
             try {
                 String result = smChain.getTransaction().queryByString(
                         chaincodeName,
@@ -167,7 +170,7 @@ public class SmTransactionImpTest {
                 for (int i = 0; i < TX_COUNT; i++) {
                     smChain.getTransaction().invokeByString(
                             chaincodeName,
-                            "PutRecord",
+                            "GetRecord",
                             new String[]{key + i, "value" + i}
                     );
                     if (i % 500 == 0) {
