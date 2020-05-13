@@ -15,7 +15,7 @@ public class ThreadTPS {
 //    private static String shpPath = ThreadTPS.class.getResource("BL/BL.shp").getFile();
 
     public static void main(String[] args) throws InterruptedException {
-        int threadCount = 8;
+        int threadCount = 1;
 //        List<byte[]> arrayList = new GeoData().getGeo(shpPath);
         List<Integer> arrayList = new ArrayList<>();
         for (int i = 0; i < 1000 * threadCount; i++) {
@@ -41,34 +41,37 @@ public class ThreadTPS {
         }
         long endTime = System.currentTimeMillis();
         System.out.println((endTime - startTime) / 1000.0 + " s");
-        System.out.println(arrayList.size() / ((endTime - startTime) / 1000.0) + " TPS");
+        System.out.println(4 * arrayList.size() / ((endTime - startTime) / 1000.0) + " TPS");
     }
 
     static class SubThreadTPS implements Runnable{
         List<Integer> geoBytes;
         SubThreadTPS(List<Integer> geoBytes) {
             this.geoBytes = geoBytes;
-
         }
+
 
         public void run() {
 //            long startTime = System.currentTimeMillis();
+            boolean put = true;
+            boolean get = false;
 
             SmChain smChain = SmChain.getChain(channelName, networkFile);
             SmTransaction smTransaction = smChain.getTransaction();
             int i = 0;
             for (Integer integer : geoBytes) {
-//                smTransaction.invokeByString(
-//                        chaincodeName,
-//                        "PutRecord",
-//                        new String[]{getSHA256(integer.toString()), integer.toString()});
-
-                String s = smTransaction.queryByString(
-                        chaincodeName,
-                        "GetRecordByKey",
-                        new String[]{"key"+integer});
-//                System.out.println(s);
-
+                if (get) {
+                    smTransaction.invokeByString(
+                            chaincodeName,
+                            "PutRecord",
+                            new String[]{"key"+integer.toString(), "value"+integer.toString()});
+                } else {
+                    String s = smTransaction.queryByString(
+                            chaincodeName,
+                            "GetRecordByKey",
+                            new String[]{"key" + integer});
+                    System.out.println(s);
+                }
                 i++;
             }
 

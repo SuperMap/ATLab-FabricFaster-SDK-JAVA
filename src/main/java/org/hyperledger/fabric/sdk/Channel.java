@@ -4315,8 +4315,11 @@ public class Channel implements Serializable {
 
             SignedProposal invokeProposal = getSignedProposal(transactionContext, proposalBuilder.build());
 
-            FabricProposal.SignedProposals.Builder builder = FabricProposal.SignedProposals.newBuilder().addSignedProposal(invokeProposal);
-            builder.addSignedProposal(invokeProposal);
+            FabricProposal.SignedProposals.Builder builder = FabricProposal.SignedProposals.newBuilder();
+            for (int i = 0; i < 4; i++) {
+                builder.addSignedProposal(invokeProposal);
+            }
+
             FabricProposal.SignedProposals invokeProposals = builder.build();
             return sendProposalToPeers(peers, invokeProposals, transactionContext);
         } catch (ProposalException e) {
