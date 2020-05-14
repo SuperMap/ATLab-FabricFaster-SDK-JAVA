@@ -18,7 +18,7 @@ public class ThreadTPS {
         int threadCount = 1;
 //        List<byte[]> arrayList = new GeoData().getGeo(shpPath);
         List<Integer> arrayList = new ArrayList<>();
-        for (int i = 0; i < 1000 * threadCount; i++) {
+        for (int i = 0; i < 2000 * threadCount; i++) {
             arrayList.add(i);
         }
         int count = arrayList.size() / threadCount;
@@ -69,7 +69,7 @@ public class ThreadTPS {
                     String s = smTransaction.queryByString(
                             chaincodeName,
                             "GetRecordByKey",
-                            new String[]{"key" + integer});
+                            new String[]{"key" + integer, "key" + (integer + 1), "key" + (integer + 2), "key" + (integer + 3), "4"});
                     System.out.println(s);
                 }
                 i++;

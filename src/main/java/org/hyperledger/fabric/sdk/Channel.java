@@ -4311,12 +4311,19 @@ public class Channel implements Serializable {
             // Protobuf message builder
             ProposalBuilder proposalBuilder = ProposalBuilder.newBuilder();
             proposalBuilder.context(transactionContext);
-            proposalBuilder.request(proposalRequest);
-
-            SignedProposal invokeProposal = getSignedProposal(transactionContext, proposalBuilder.build());
-
+            ArrayList<String> args = proposalRequest.args;
             FabricProposal.SignedProposals.Builder builder = FabricProposal.SignedProposals.newBuilder();
-            for (int i = 0; i < 4; i++) {
+            int txNum = Integer.parseInt(args.get(args.size() - 1));
+            int argsPerTx = (args.size() - 1) / txNum;
+            // 根据交易参数，将请求拆解为多个请求
+            for (int i = 0; i < txNum; i++) {
+                ArrayList<String> strings = new ArrayList<>();
+                for (int j = 0; j < argsPerTx; j++) {
+                    strings.add(args.get(i * argsPerTx + j));
+                }
+                proposalRequest.args = strings;
+                proposalBuilder.request(proposalRequest);
+                SignedProposal invokeProposal = getSignedProposal(transactionContext, proposalBuilder.build());
                 builder.addSignedProposal(invokeProposal);
             }
 
@@ -4443,7 +4450,7 @@ public class Channel implements Serializable {
 
                 // 将Fabric的ProposalResponse封装到sdk的ProposalResponse中
                 ProposalResponse proposalResponse = new ProposalResponse(transactionContext, status, message);
-                proposalResponse.setProposalResponse(fabricResponse);
+                proposalResponse.setProposalResponse(response);
                 proposalResponse.setProposal(signedProposals.getSignedProposal(0));
                 proposalResponse.setPeer(peerFuturePair.peer);
 

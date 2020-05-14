@@ -23,7 +23,7 @@ public class SmTransactionImpTest {
             String result = smChain.getTransaction().queryByString(
                     chaincodeName,
                     "GetRecordByKey",
-                    new String[]{"key3"}
+                    new String[]{"key1", "key2", "key3", "key4", "4"}   // 最后一个数字表示该请求中包含多少交易
             );
             System.out.println("result:" + result);
             long endTime = System.currentTimeMillis();
@@ -40,7 +40,7 @@ public class SmTransactionImpTest {
             String result = smChain.getTransaction().invokeByString(
                     chaincodeName,
                     "PutRecord",
-                    new String[]{"key3", "value3"}
+                    new String[]{"key3", "value3", "1"}
             );
             System.out.println(result);
             long endTime = System.currentTimeMillis();
