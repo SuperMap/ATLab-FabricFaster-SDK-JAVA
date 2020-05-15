@@ -18,7 +18,7 @@ public class ThreadTPS {
         int threadCount = 1;
 //        List<byte[]> arrayList = new GeoData().getGeo(shpPath);
         List<Integer> arrayList = new ArrayList<>();
-        for (int i = 0; i < 2000 * threadCount; i++) {
+        for (int i = 0; i < 500 * threadCount; i++) {
             arrayList.add(i);
         }
         int count = arrayList.size() / threadCount;
